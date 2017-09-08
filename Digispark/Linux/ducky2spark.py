@@ -12,24 +12,19 @@ from fnmatch import fnmatch
 from subprocess import Popen,PIPE
 
 #Strings used in programme
-cf2c = "Choose file to convert : "
+cf2c = "\nChoose file to convert : "
 cb2i = "Convert ducky script to arduino script"
 cd2i = "Concert binary file to arduino script"
-wiyc = "What is your choice : "
+wiyc = "\nWhat is your choice : "
 convbin = "Converting file to bin"
 convino = "Converting file to ino"
-duckencoder = "java -jar ./exes/duckencoder.jar -i"
+duckencoder = "java -jar ./exes/duckencoder.jar -i "
+ducky2spark = "python ./exes/duck2spark.py -i "
+choosemapping = "Choose keyboard mapping to use : "
 
-def choosfile(choix):
-    files = ""
-    path = ""
-    mapping = ""
+def choosefile(path):
+    files = []
     length = 0
-
-    if choix == 1:
-        path = "./bin/"
-    if choix == 2:
-        path = "./scripts/"
 
     for files in os.walk(path):
         length = len(files)
@@ -40,11 +35,30 @@ def choosfile(choix):
         print(str(i+1)+") "+j)
     while choix not in range(0,length):
         choix = int(raw_input(cf2c))-1
-    path = path+files[choix]
-    ifbin = path.find("./bin/")
-    if(ifbin < 0):
-        execute = os.popen(duckencoder).read()
-        print(execute)
+    path = path+files[choix]+" "
+    return path
+
+def duckToIno():
+    global duckencoder
+    mapping = ""
+    path = choosefile("./scripts/")
+    filename = path[10:-6]
+    while mapping not in ["be","ca","ch","de","dk","es","fr","gb","it","no","pt","ru","sv","uk","us"]:
+        mapping = raw_input(choosemapping)
+    duckencoder = duckencoder+path+"-o ./bin/"+filename+".bin -l "+mapping
+    filename = "./bin/"+filename+".bin"
+    execute = os.popen(duckencoder).read()
+    print(execute)
+    binToIno(filename)
+
+def binToIno(path):
+    global ducky2spark
+    isdir = os.path.isdir("./ino/"+path[6:-5])
+    if(isdir == False):
+        os.mkdir("./ino/"+path[6:-5])
+    ducky2spark = ducky2spark+path+" -l 1 -o ./ino/"+path[6:-5]+"/"+path[6:-5]+".ino"
+    #print(ducky2spark)
+    execute = os.system(ducky2spark)
 
 def main():
     choix = ""
@@ -52,8 +66,10 @@ def main():
         print("1) "+cd2i)
         print("2) "+cb2i)
         choix = int(raw_input(wiyc))
-    choosfile(choix)
-
+    if choix == 1:
+        binToIno(choosefile("./bin/"))
+    if choix == 2:
+        duckToIno()
 
 if __name__ == '__main__':
     main()
