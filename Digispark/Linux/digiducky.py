@@ -53,10 +53,12 @@ def duckToIno():
 
 def binToIno(path):
     global ducky2spark
-    isdir = os.path.isdir("./ino/"+path[6:-5])
+    directory = path[6:-4]
+    isdir = os.path.isdir("./ino/"+directory)
+    print("Dir : "+directory)
     if(isdir == False):
-        os.mkdir("./ino/"+path[6:-5])
-    ducky2spark = ducky2spark+path+" -l 1 -o ./ino/"+path[6:-5]+"/"+path[6:-5]+".ino"
+        os.mkdir("./ino/"+directory)
+    ducky2spark = ducky2spark+path+" -l 1 -o ./ino/"+directory+"/"+directory+".ino"
     #print(ducky2spark)
     execute = os.system(ducky2spark)
 
